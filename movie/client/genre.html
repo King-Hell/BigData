@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>分类</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<nav-main active="genre" id="nav-main"></nav-main>
+<div class="container" id="movie-genre">
+    <h1 class="display-4">电影分类浏览</h1>
+    <ul class="nav nav-tabs shadow rounded bg-light">
+        <li class="nav-item" v-for="(value,genre,index) in genres"><a class="nav-link" data-toggle="tab"
+                                                                      :href="'#'+genre"
+                                                                      :class="index==active?'active':''"
+                                                                      @click="getGenre(genre)">{{genre}}</a>
+        </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content bg-light">
+        <div class="tab-pane fade" v-for="(value,genre,index) in genres" :id="genre"
+             :class="index==active?'active show':''">
+            <div class="progress" v-if="!list[genre]">
+                <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">加载中</div>
+            </div>
+            <table v-if="list[genre]" class="table table-hover table-striped shadow border">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>电影</th>
+                    <th>分类</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr v-for="movie in list[genre]">
+                    <td v-for="value in movie"><a :href="'movie.html?id='+movie[0]" class="alert-link">{{value}}</a></td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- Nav tabs<div class="nav-partition"></div> -->
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.js"></script>
+<script src="js/nav-main.js"></script>
+<script>
+    new Vue({el: '#nav-main'});
+    new Vue({
+        el: '#nav-main',
+        data: {
+            active: '1',
+            titles: {
+                'index': '主页',
+                'genre': '分类',
+                'movie': '电影'
+            }
+        }
+    })
+    new Vue({
+        el: '#movie-genre',
+        data: {
+            active: 0,
+            genres: {
+                'Action': false,
+                'Adventure': false,
+                'Animation': false,
+                'Children': false,
+                'Comedy': false,
+                'Crime': false,
+                'Documentary': false,
+                'Drama': false,
+                'Fantasy': false,
+                'Film-Noir': false,
+                'Horror': false,
+                'IMAX': false,
+                'Musical': false,
+                'Mystery': false,
+                'Romance': false,
+                'Sci-Fi': false,
+                'Thriller': false,
+                'War': false,
+                'Western': false,
+            },
+            list: {}
+        },
+        created: function () {
+            let self = this;
+            const genre = 'Action';
+            $.get("http://localhost:5432/movies/genre/" + genre, function (response) {
+                Vue.set(self.list, genre, eval(response));
+            })
+            this.genres[genre] = true;
+        },
+        methods: {
+            getGenre(genre) {
+                if (this.genres[genre] == false) {
+                    let self = this;
+                    $.get("http://localhost:5432/movies/genre/" + genre, function (response) {
+                        Vue.set(self.list, genre, eval(response));
+                    })
+                    this.genres[genre] = true;
+                }
+            }
+        },
+    })
+
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+target
+test
+*.log
+.idea
+nba/
+hdfs-2.5.1/
+HDFSUtil/

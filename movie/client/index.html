@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>电影推荐系统</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<nav-main active="index" id="nav-main"></nav-main>
+<div class="container">
+    <div class="jumbotron text-center">
+        <div class="container"></div>
+        <h1 class="display-4">电影推荐系统</h1>
+        <p class="lead">基于ALS协同过滤算法</p>
+        <hr class="my-4">
+        <p>本系统仅作为学习交流使用</p>
+        <a id="learn-more" class="btn btn-primary btn-lg" href="#" role="button">Learn more</a>
+    </div>
+
+</div>
+<!-- Nav tabs -->
+<ul class="nav nav-tabs container">
+    <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#imdb">IMDb</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#tmd">Tomatoes</a>
+    </li>
+</ul>
+
+<!-- Tab panes -->
+<div class="tab-content">
+    <div class="tab-pane fade active" id="imdb"></div>
+    <div class="tab-pane fade center" id="tmd">
+        <iframe src="https://www.rottentomatoes.com/" height="2000px" width="1200px" frameborder="0" ></iframe>
+    </div>
+</div>
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.js"></script>
+<script src="js/nav-main.js"></script>
+<script>
+    new Vue({el: '#nav-main'});
+    function top_ratings(user_id, count) {
+        $.get("http://localhost:5432/" + user_id + "/ratings/top/" + count)
+    }
+
+    var test = new Vue({
+        el: '#test',
+        data: {
+            info: 'Hello Vue!'
+        },
+        methods: {
+            rating: top_ratings(1, 1)
+        }
+    })
+</script>
+<script>
+    $(document).ready(function () {
+        $("#imdb").load("https://www.imdb.com/");
+    });
+</script>
+</body>
+</html>

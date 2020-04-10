@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>推荐</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<nav-main active="recommend" id="nav-main"></nav-main>
+<div class="container" id="recommend">
+    <h1 class="display-4">推荐电影</h1>
+    <p class="text-secondary">为您推荐<span class="badge badge-primary badge-pill">20</span>部可能感兴趣的电影</p>
+    <div class="progress" v-if="movies.length===0">
+        <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">加载中</div>
+    </div>
+    <div class="list-group shadow">
+        <a class="list-group-item list-group-item-action justify-content-between align-items-center d-flex text-center"
+           v-for="movie in movies" :href="'movie.html?id='+movie[1]">{{movie[0].replace('"','')}}<span
+                class="badge badge-primary">{{movie[2]}}人表示很赞</span></a>
+    </div>
+</div>
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.js"></script>
+<script src="js/nav-main.js"></script>
+<script>
+    new Vue({el: '#nav-main'});
+    new Vue({
+        el: '#recommend',
+        data: {
+            movies: []
+        },
+        created: function () {
+            let self = this;
+            $.get("http://localhost:5432/ratings/top/1/20", function (response) {
+                self.movies = eval(response);
+            })
+        }
+    })
+</script>
+</body>
+</html>

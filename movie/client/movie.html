@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>电影详情</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/css/bootstrap.css">
+    <link rel="stylesheet" href="css/font-awesome.css">
+    <link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+<nav-main active="movie" id="nav-main"></nav-main>
+<div class="container">
+    <div class="jumbotron shadow" style="padding-top: 32px;">
+        <div id="movie-info">
+            <div class="card text-center shadow">
+                <span class="badge badge-secondary"><h1 class="display-2"> {{info.Title}} </h1></span>
+            </div>
+            </br>
+            <div class="card-deck">
+                <div class="card col-lg-6 shadow">
+                    <img class="card-img-top" :src="info.Poster">
+                </div>
+                <div class="card col-lg-6 shadow">
+                    <div class="card-body">
+                        <p v-for="(value,key) in info" v-if="key in zh">{{zh[key]}}:{{value}}</p>
+                        <p>网址:<a :href="info.Website">{{info.Website}}</a></p>
+                    </div>
+                </div>
+            </div>
+            </br>
+            <div class="card shadow">
+                <div class="card-header text-center"><h3>各网站评分</h3></div>
+                <div class="card-body">
+                    <!--                <table class="table table-striped">
+                                        <tbody>
+                                        <tr v-for="rating in info.Ratings">
+                                            <td v-for="value in rating">{{value}}</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>-->
+                    <ul class="list-group" v-if="'Ratings' in info">
+                        <li class="list-group-item list-group-item-warning list-group-item-action ">IMDb评分：
+                            {{info.Ratings[0].Value}}
+                        </li>
+                        <li class="list-group-item list-group-item-danger list-group-item-action">烂番茄新鲜度：
+                            {{info.Ratings[1].Value}}
+                        </li>
+                        <li class="list-group-item list-group-item-secondary list-group-item-action">Metacritic评分：
+                            {{info.Ratings[2].Value}}
+                        </li>
+                        <li class="list-group-item list-group-item-primary list-group-item-action">本站评分： {{rating}}/5
+                        </li>
+                    </ul>
+                </div>
+
+            </div>
+        </div>
+        <div class="card shadow">
+            <div class="card-footer">
+                你的评分:
+                <div id="star"></div>
+            </div>
+
+        </div>
+        <div class="card shadow" id="similar">
+            <div class="card-header lead">喜欢该电影的用户也喜欢：</div>
+            <div class="card-body">
+                <div class="progress" v-if="info.length===0">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%">加载中</div>
+                </div>
+                <div class="list-group shadow" >
+                    <a class="list-group-item list-group-item-action" v-for="movie in info" :href="'movie.html?id='+movie[0]">{{movie[1].replace('"','')}}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- 模态框 -->
+<div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- 模态框头部 -->
+            <div class="modal-header">
+                <h4 class="modal-title">提示</h4>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <!-- 模态框主体 -->
+            <div class="modal-body">
+                评论成功
+            </div>
+            <!-- 模态框底部 -->
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.bootcss.com/vue/2.6.10/vue.js"></script>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.js"></script>
+<script src="https://cdn.bootcss.com/twitter-bootstrap/4.3.1/js/bootstrap.bundle.js"></script>
+<script src="js/nav-main.js"></script>
+<script src="js/star.js"></script>
+<script>
+    var id = 0;
+    new Star({
+        el: '#star',
+        number: 5,//一共有几颗星
+        starNumber: 0,//默认选择几颗星
+        isHalf: true,//是否需要显示半星
+        starSize: 26,//星的大小,填写的值为font-size
+        color: 'orange',//星的颜色
+        success: function (number) {//选择完毕回调
+            $.get("http://localhost:5432/ratings/add/0/" + id + "/" + number, function (response) {
+                if (response === "OK") {
+                    $("#myModal").modal('show');
+                }
+            })
+        }
+    });
+    new Vue({el: '#nav-main'});
+
+    new Vue({
+        el: '#movie-info',
+        data: {
+            info: {},
+            id: 0,
+            imdbid: 0,
+            rating: 0,
+            zh: {
+                'Year': '年份',
+                'Rated': '分级',
+                'Released': '上映日期',
+                'Runtime': '片长',
+                'Genre': '类型',
+                'Director': '导演',
+                'Writer': '编剧',
+                'Actors': '主演',
+                'Plot': '剧情简介',
+                'Language': '语言',
+                'Country': '制片国家/地区',
+                'Awards': '奖项',
+                'Type': '类型',
+                'DVD': 'DVD发行时间',
+                'Production': '发行方',
+                'BoxOffice': '票房',
+            }
+        },
+        created: function () {
+            var self = this;
+            self.id = getParam('id');
+            id = self.id;
+            $.get("http://localhost:5432/movies/getimdb/" + self.id, function (response) {
+                var result = eval(response);
+                self.imdbid = result[0];
+                self.rating = result[1].toFixed(2);
+                $.get("http://www.omdbapi.com/?apikey=f4d93fc7&i=tt" + PrefixInteger(self.imdbid, 7), function (response) {
+                    self.info = eval(response)
+                })
+            });
+
+        }
+    });
+
+    new Vue({
+        el:'#similar',
+        data:{
+            info:[]
+        },
+        created:function () {
+            let self=this;
+            $.get("http://localhost:5432/movies/similar/"+getParam('id')+"/6",function (response) {
+                self.info=eval(response);
+                self.info.shift();
+            })
+        }
+    })
+
+    function getParam(name) {//获取url参数
+        var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)");
+        var r = window.location.search.substr(1).match(reg);
+        if (r != null) return unescape(r[2]);
+        return null;
+    }
+
+    function PrefixInteger(num, n) {
+        return (Array(n).join(0) + num).slice(-n);
+    }
+</script>
+</body>
+</html>
